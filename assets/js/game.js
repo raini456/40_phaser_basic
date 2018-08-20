@@ -18,16 +18,17 @@
             }
         },
         scene: {
-            preload: preload,
-            create: create,
-            //update lädt immer wieder
-            update: update
+            preload:preload,
+            create:create,
+            update:update
+            
         }
     };
     console.log(Phaser);
     //neues Phaser-Objekt
     var game = new Phaser.Game(config);
     function preload() {
+        this.load.image('backyard', 'assets/images/backyard.jpg');
         this.load.image('sky', 'assets/images/sky.png');
         this.load.image('star', 'assets/images/star.png');
         //this.load.image('cat', 'assets/images/cat.png');
@@ -44,14 +45,14 @@
             'assets/audio/fx_mixdown.mp3'
             ]
         );
-        death = this.sound.playAudioSprite('sfx', 'death');
-        meow = this.sound.playAudioSprite('sfx', 'meow');
+        //death = this.sound.playAudioSprite('sfx', 'death');
+        //meow = this.sound.playAudioSprite('sfx', 'meow');
         
     }
     function create() {
         //Phaser positioniert immer in der Mitte des Bildschirms ...
-
-        this.add.image(400, 300, 'sky');
+        this.add.image(400, 300, 'backyard');
+        //this.add.image(400, 300, 'sky');
         //this.add.image(300,200, 'cat');       
         platforms = this.physics.add.staticGroup();        
         //es wird eine Gruppe von Platformen erstellt, auf denen Aktionen stattfinden können
@@ -141,7 +142,7 @@
         
         //Möglich auch (true, false) oder auch (false, true) oder (false, false)
     }
-    function update(){
+    function update(){       
        if(cursors.left.isDown){           
         player.setVelocityX(-160);
         player.anims.play('left', true);
