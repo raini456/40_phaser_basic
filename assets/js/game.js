@@ -1,6 +1,6 @@
 (function () {
     
-    var platforms, player, cursors, stars, bombs, death, meow;
+    var platforms, player, cursors, stars, bombs, noise, meow;
     var score = 0;
     var scoreText;
     var config = {
@@ -8,6 +8,7 @@
         type: Phaser.AUTO,
         width: 800,
         height: 600,
+        pixelArt:false,
         //physics definiert die Eigenschaften des Spielobjektes, in dem Fall dem 'dude'
         physics: {
             default: 'arcade',
@@ -23,6 +24,7 @@
             update:update
             
         }
+        
     };
     console.log(Phaser);
     //neues Phaser-Objekt
@@ -44,26 +46,22 @@
             'assets/audio/fx_mixdown.ogg',
             'assets/audio/fx_mixdown.mp3'
             ]
-        );
-        //death = this.sound.playAudioSprite('sfx', 'death');
-        //meow = this.sound.playAudioSprite('sfx', 'meow');
-        
+        );          
     }
+    var fx;
     function create() {
         //Phaser positioniert immer in der Mitte des Bildschirms ...
         this.add.image(400, 300, 'backyard');
-        //this.add.image(400, 300, 'sky');
-        //this.add.image(300,200, 'cat');       
         platforms = this.physics.add.staticGroup();        
         //es wird eine Gruppe von Platformen erstellt, auf denen Aktionen stattfinden können
         platforms.create(10, 128, 'ground').setScale(1.3).refreshBody();
         platforms.create(740, 249, 'ground').refreshBody();
         platforms.create(589, 400, 'ground');
-        platforms.create(400, 568, 'ground').setScale(2.6).refreshBody();
+        platforms.create(400, 568, 'ground').setScale(2.1).refreshBody();
         //fügt dem Canvas den Spieler hinzu
         player = this.physics.add.sprite(100, 50, 'dude');
         //setBounce regelt das Aufkommen auf dem Rahmen
-        player.setBounce(0.6);
+        player.setBounce(0.4);
         //setzt den Rahmen des Canvas als Maßstab der Bewegungsmöglichkeit
         player.setCollideWorldBounds(true);
         //Definiert die Animation des Spiels, this ist hier das Spiel selbt
@@ -90,6 +88,7 @@
             frames: [{key: 'dude', frame: 4}],
             frameRate: 20
         });
+        
         this.physics.add.collider(player, platforms);
         cursors = this.input.keyboard.createCursorKeys();
         stars = this.physics.add.group({
@@ -107,14 +106,9 @@
             fill:'whitesmoke'
         });
         bombs=this.physics.add.group();
-        
-        /*{
-            key: 'bomb',
-            repeat: 3,
-            setXY: {x: 30, y: 12, stepX: 112}
-        }*/
         this.physics.add.collider(bombs, platforms);
-        this.physics.add.overlap(player, bombs, bumm, null, this);
+        this.physics.add.overlap(player, bombs, bumm, null, this);         
+        noise = this.sound.add('sfx');        
     }
     
         
@@ -122,12 +116,12 @@
         player.setTint(0xff0000);//.clearTint ist die Gegenfunktion
         this.physics.pause();
         bomb.disableBody(true,true);
-        player.anims.play('turn');   
-        death;
+        player.anims.play('turn');          
+        noise.play();       
     }
     function collectStar(player, star){
         //1. true macht das Objekt nicht mehr ansprechbar, 2. true lässt es verschwinden
-        meow;
+        
         star.disableBody(true, true);
         score +=1;
         scoreText.setText('Points: '+score);
