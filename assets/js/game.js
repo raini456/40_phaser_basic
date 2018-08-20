@@ -1,5 +1,6 @@
 (function () {
-    var platforms, player, cursors, stars;
+    
+    var platforms, player, cursors, stars, bombs, death, meow;
     var score = 0;
     var scoreText;
     var config = {
@@ -35,16 +36,24 @@
         this.load.spritesheet('dude', "assets/images/dude.png", {
             frameWidth: 32,
             frameHeight: 48
-        });
+        });  
+        this.load.audioSprite('sfx', 
+            'assets/audio/fx_mixdown.json', 
+            [
+            'assets/audio/fx_mixdown.ogg',
+            'assets/audio/fx_mixdown.mp3'
+            ]
+        );
+        death = this.sound.playAudioSprite('sfx', 'death');
+        meow = this.sound.playAudioSprite('sfx', 'meow');
+        
     }
     function create() {
         //Phaser positioniert immer in der Mitte des Bildschirms ...
 
         this.add.image(400, 300, 'sky');
         //this.add.image(300,200, 'cat');       
-        platforms = this.physics.add.staticGroup();
-        this.add.image(40, 250, 'bomb');        
-        /*this.add.image(400,300,'star');*/
+        platforms = this.physics.add.staticGroup();        
         //es wird eine Gruppe von Platformen erstellt, auf denen Aktionen stattfinden können
         platforms.create(10, 128, 'ground').setScale(1.3).refreshBody();
         platforms.create(740, 249, 'ground').refreshBody();
@@ -96,12 +105,40 @@
             fontSize:'40px',
             fill:'whitesmoke'
         });
+        bombs=this.physics.add.group();
+        
+        /*{
+            key: 'bomb',
+            repeat: 3,
+            setXY: {x: 30, y: 12, stepX: 112}
+        }*/
+        this.physics.add.collider(bombs, platforms);
+        this.physics.add.overlap(player, bombs, bumm, null, this);
+    }
+    
+        
+    function bumm(player, bomb){
+        player.setTint(0xff0000);//.clearTint ist die Gegenfunktion
+        this.physics.pause();
+        bomb.disableBody(true,true);
+        player.anims.play('turn');   
+        death;
     }
     function collectStar(player, star){
         //1. true macht das Objekt nicht mehr ansprechbar, 2. true lässt es verschwinden
+        meow;
         star.disableBody(true, true);
         score +=1;
         scoreText.setText('Points: '+score);
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var bomb = bombs.create(x, 16, 'bomb');
+        bomb.setBounce(0.1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.allowGravity = false;
+        
+        
         //Möglich auch (true, false) oder auch (false, true) oder (false, false)
     }
     function update(){
@@ -121,5 +158,5 @@
         player.setVelocityY(-330);
         //player.anims.play('left', true);
        }
-    }
+    }    
 })();
