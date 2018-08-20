@@ -1,24 +1,26 @@
 (function () {
-    var platforms, player, cursors;
-    var config={
+    var platforms, player, cursors, stars;
+    var score = 0;
+    var scoreText;
+    var config = {
         //Phaser.AUTO sucht automatisch, ob Browser 2-D oder 3-D darstellt
-        type:Phaser.AUTO,
-        width:800,
-        height:600,
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
         //physics definiert die Eigenschaften des Spielobjektes, in dem Fall dem 'dude'
-        physics:{
-            default:'arcade',
-                arcade:{
-                    //regelt die Anziehung des Spielers an den Boden
-                    gravity:{y:300},
-                    debug:false
-                }
+        physics: {
+            default: 'arcade',
+            arcade: {
+                //regelt die Anziehung des Spielers an den Boden
+                gravity: {y: 300},
+                debug: false
+            }
         },
-        scene:{
-            preload:preload,
-            create:create,
+        scene: {
+            preload: preload,
+            create: create,
             //update lädt immer wieder
-            update:update
+            update: update
         }
     };
     console.log(Phaser);
@@ -41,13 +43,13 @@
         this.add.image(400, 300, 'sky');
         //this.add.image(300,200, 'cat');       
         platforms = this.physics.add.staticGroup();
-        this.add.image(40, 250, 'bomb');
-        this.add.image(150, 140, 'dude');
-        this.add.image(400,300,'star');//es wird eine Gruppe von Platformen erstellt, auf denen Aktionen stattfinden können
-        platforms.create(400, 128, 'ground').setScale(2).refreshBody();
-        platforms.create(600, 400, 'ground');
+        this.add.image(40, 250, 'bomb');        
+        /*this.add.image(400,300,'star');*/
+        //es wird eine Gruppe von Platformen erstellt, auf denen Aktionen stattfinden können
+        platforms.create(10, 128, 'ground').setScale(1.3).refreshBody();
+        platforms.create(740, 249, 'ground').refreshBody();
+        platforms.create(589, 400, 'ground');
         platforms.create(400, 568, 'ground').setScale(2.6).refreshBody();
-        platforms.create(50, 249, 'ground').setScale(1.5).refreshBody();
         //fügt dem Canvas den Spieler hinzu
         player = this.physics.add.sprite(100, 50, 'dude');
         //setBounce regelt das Aufkommen auf dem Rahmen
@@ -73,18 +75,51 @@
             frameRate: 10,
             repeat: -1
         });
-    this.anims.create({
-        key:'turn',
-        frames:[{key:'dude', fame:4}],
-        frameRate:20
-    });
-    this.physics.add.collider(player, platforms);
-    cursors = this.input.keyboard.createCursorKeys();
+        this.anims.create({
+            key: 'turn',
+            frames: [{key: 'dude', frame: 4}],
+            frameRate: 20
+        });
+        this.physics.add.collider(player, platforms);
+        cursors = this.input.keyboard.createCursorKeys();
+        stars = this.physics.add.group({
+            key: 'star',
+            repeat: 15,
+            setXY: {x: 10, y: 10, stepX: 50}
+        });
+        stars.children.iterate(function(child){
+            child.setBounceY(Phaser.Math.FloatBetween(0.2,0.8));
+        });
+        this.physics.add.collider(stars, platforms);
+        this.physics.add.overlap(player,stars,collectStar, null, this);
+        scoreText = this.add.text(250,20,'Points: 0',{            
+            fontSize:'40px',
+            fill:'whitesmoke'
+        });
+    }
+    function collectStar(player, star){
+        //1. true macht das Objekt nicht mehr ansprechbar, 2. true lässt es verschwinden
+        star.disableBody(true, true);
+        score +=1;
+        scoreText.setText('Points: '+score);
+        //Möglich auch (true, false) oder auch (false, true) oder (false, false)
     }
     function update(){
        if(cursors.left.isDown){           
         player.setVelocityX(-160);
         player.anims.play('left', true);
-       } 
+       }
+       else if(cursors.right.isDown){
+           player.setVelocityX(160);
+           player.anims.play('right', true);
+       }
+       else{
+           player.setVelocityX(0);
+           player.anims.play('turn', true);
+       }
+       if(cursors.up.isDown && player.body.touching.down){           
+        player.setVelocityY(-330);
+        //player.anims.play('left', true);
+       }
     }
 })();
